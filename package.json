@@ -1,6 +1,6 @@
 {
   "name": "npmc",
-  "description": "Check out whats going on with your npm modules",
+  "description": "Check out the size of all your dependencies before/after minification",
   "version": "0.0.0",
   "bin": {
     "npmc": "./cli.js"

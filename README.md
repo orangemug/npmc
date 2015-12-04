@@ -1,5 +1,5 @@
 # npmc
-Check out whats going on with your npm modules
+Check out the size of all your dependencies before/after minification
 
 > Check-ch-check-check-check-ch-check it out 
 > What-wha-what-what-what's it all about 
