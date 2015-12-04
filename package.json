@@ -1,7 +1,7 @@
 {
   "name": "npmc",
   "description": "Check out the size of all your dependencies before/after minification",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "bin": {
     "npmc": "./cli.js"
   },
