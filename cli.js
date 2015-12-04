@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 var yargs       = require("yargs");
+var chalk       = require("chalk");
 var browserify  = require("browserify");
 var UglifyJS    = require("uglify-js");
 var fs          = require("fs");
@@ -6,9 +8,18 @@ var collect     = require("stream-collect");
 var async       = require("async");
 var prettyBytes = require("pretty-bytes");
 var path        = require("path");
+var pkg         = require("./package");
 
 
-var argv = yargs.argv;
+var argv = yargs
+  .usage(pkg.description+"\nUsage: $0")
+  .version(function() {
+    return pkg.version;
+  })
+  .demand(1)
+  .help("help")
+  .alias("h", "help")
+  .argv;
 
 
 run(
@@ -22,6 +33,7 @@ function run(filepath) {
   try {
     var raw = fs.readFileSync(filepath).toString()
   } catch(err) {
+    console.error("Failed to read: %s", filepath);
     process.exit(3);
   }
 
@@ -48,7 +60,7 @@ function run(filepath) {
   var dependencies = Object.keys(pkg.dependencies || {});
   var out = {};
 
-  async.eachLimit(dependencies, 40, function iterator(moduleName, done) {
+  async.eachLimit(dependencies, 50, function iterator(moduleName, done) {
     var b = browserify();
     b.add(dirname+"/node_modules/"+moduleName);
 
@@ -57,22 +69,23 @@ function run(filepath) {
     };
     var err;
 
+    console.log(chalk.gray("[processing]")+" %s", moduleName);
 
     b
       .bundle()
       .pipe(collect.stream())
       .on("error", function(_err) {
         if(!err) {
-          console.log("module: %s", moduleName);
+          console.log(chalk.green("[processed]")+"  %s", moduleName);
           out[moduleName].err = _err;
           done();
         }
         err = _err;
       })
       .on("collect", function(data) {
-        console.log("module: %s", moduleName);
         // out[moduleName].data = data;
         out[moduleName].stats = statsGroup(data.toString());
+        console.log(chalk.green("[processed]")+"  %s", moduleName);
         done();
       })
 
@@ -80,7 +93,10 @@ function run(filepath) {
     console.log("");
     Object.keys(out).forEach(function(moduleName) {
       var m = out[moduleName];
-      console.log("%s (%s)", moduleName, m.version);
+      console.log("%s (%s)",
+        chalk.gray(moduleName),
+        chalk.green(m.version)
+      );
       if(m.err) {
         console.log("  ERR");
       } else {
