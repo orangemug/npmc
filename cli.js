@@ -61,8 +61,10 @@ function run(filepath) {
   var out = {};
 
   async.eachLimit(dependencies, 50, function iterator(moduleName, done) {
-    var b = browserify();
-    b.add(dirname+"/node_modules/"+moduleName);
+    var b = browserify({
+      entry: dirname
+    });
+    b.add(moduleName);
 
     out[moduleName] = {
       version: pkg.dependencies[moduleName]
